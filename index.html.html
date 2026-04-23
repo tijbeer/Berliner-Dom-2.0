@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fotojacht · Berliner Dom</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&display=swap');
+  :root {
+    --zwart: #0e0c0a; --ivoor: #f5f0e8; --rood: #9b2335;
+    --goud: #a07c10; --grijs: #6b6560; --lichtgrijs: #e8e2d8; --wit: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--ivoor); color: var(--zwart); font-family: 'Source Serif 4', Georgia, serif; font-size: 15px; line-height: 1.75; min-height: 100vh; }
+  header { background: var(--zwart); color: var(--ivoor); padding: 40px 32px 32px; position: relative; overflow: hidden; }
+  header::before { content:''; position:absolute; inset:0; background: repeating-linear-gradient(-45deg,transparent,transparent 10px,rgba(255,255,255,0.02) 10px,rgba(255,255,255,0.02) 11px); }
+  .header-inner { position:relative; z-index:1; max-width:800px; margin:0 auto; }
+  .badge { display:inline-block; background:var(--rood); color:white; font-size:10px; letter-spacing:3px; text-transform:uppercase; padding:3px 11px; margin-bottom:14px; }
+  header h1 { font-family:'Playfair Display',serif; font-size:clamp(1.9rem,5vw,3rem); font-weight:900; line-height:1.1; margin-bottom:8px; }
+  header h1 em { color:var(--goud); font-style:normal; }
+  .sub { color:#9a9088; font-style:italic; font-size:0.9rem; margin-bottom:22px; }
+  .meta { display:flex; flex-wrap:wrap; gap:22px; border-top:1px solid #2a2622; padding-top:16px; font-size:0.78rem; color:#777; }
+  .meta strong { color:#ccc; }
+  main { max-width:800px; margin:0 auto; padding:36px 20px 64px; }
+  .intro { background:var(--wit); border-left:4px solid var(--rood); padding:18px 22px; margin-bottom:36px; box-shadow:3px 3px 0 var(--lichtgrijs); font-size:0.92rem; }
+  .intro h2 { font-family:'Playfair Display',serif; font-size:1.1rem; margin-bottom:8px; }
+
+  /* PUZZLE */
+  .puzzle-section { background:var(--zwart); color:var(--ivoor); padding:26px 28px; margin-bottom:44px; }
+  .puzzle-label { font-size:0.72rem; letter-spacing:3px; text-transform:uppercase; color:var(--goud); margin-bottom:6px; }
+  .puzzle-title { font-family:'Playfair Display',serif; font-size:1rem; color:#ccc; font-weight:400; margin-bottom:18px; }
+  .slots-row { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:10px; }
+  .slot {
+    width:46px; height:54px; border:2px dashed #444;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    position:relative; transition:border-color 0.3s, background 0.3s; user-select:none;
+  }
+  .slot.filled { border-color:var(--goud); border-style:solid; background:rgba(160,124,16,0.15); }
+  .slot.filled.pop { animation: pop 0.4s ease; }
+  @keyframes pop { 0%{transform:scale(0.6);opacity:0} 70%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
+  .slot .slot-letter { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; color:var(--goud); }
+  .slot .slot-num { position:absolute; bottom:3px; font-size:0.5rem; color:#555; }
+  .slot.filled .slot-num { color:#998020; }
+  .progress-bar-wrap { background:#1a1814; height:4px; margin:14px 0 0; }
+  .progress-bar-fill { background:var(--goud); height:4px; width:0%; transition:width 0.5s; }
+  .puzzle-feedback { font-size:0.82rem; color:#aaa; font-style:italic; min-height:20px; margin-top:8px; }
+  .puzzle-feedback.win { color:#4caf50; font-style:normal; font-weight:600; }
+
+  /* CARDS */
+  .section-head { font-family:'Playfair Display',serif; font-size:1.4rem; padding-bottom:8px; border-bottom:2px solid var(--zwart); margin-bottom:6px; position:relative; }
+  .section-head::after { content:''; position:absolute; bottom:-2px; left:0; width:50px; height:2px; background:var(--rood); }
+  .section-sub { color:var(--grijs); font-style:italic; font-size:0.87rem; margin-bottom:28px; }
+  .cards { display:flex; flex-direction:column; gap:22px; margin-top:32px; }
+  .card { background:var(--wit); border:1px solid var(--lichtgrijs); overflow:hidden; transition:box-shadow 0.2s; }
+  .card:hover { box-shadow:0 4px 18px rgba(0,0,0,0.07); }
+  .card-header { display:flex; align-items:stretch; border-bottom:1px solid var(--lichtgrijs); }
+  .card-num { width:54px; min-width:54px; background:var(--zwart); color:var(--ivoor); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:14px 0; font-family:'Playfair Display',serif; }
+  .card-num .n { font-size:1.6rem; font-weight:900; line-height:1; }
+  .card-num .l { font-size:0.6rem; color:var(--goud); letter-spacing:1px; text-transform:uppercase; margin-top:3px; }
+  .card-title-area { padding:12px 16px; flex:1; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .card-title-area h3 { font-family:'Playfair Display',serif; font-size:1rem; font-weight:700; }
+  .tag { font-size:0.65rem; letter-spacing:1.5px; text-transform:uppercase; padding:2px 8px; border:1px solid; white-space:nowrap; }
+  .tag-dom { color:#7a1a1a; border-color:#c0392b; background:#fdf2f2; }
+  .card-body { padding:16px 16px 14px 70px; }
+  .card-body p { font-size:0.9rem; color:#2a2a2a; margin-bottom:10px; }
+  .foto-box { background:#f8f6f2; border-left:3px solid var(--rood); padding:11px 15px; margin:10px 0; font-size:0.88rem; }
+  .foto-box strong { display:block; font-size:0.7rem; letter-spacing:1.5px; text-transform:uppercase; color:var(--rood); margin-bottom:4px; }
+  .vraag-box { background:#f0f4ff; border-left:3px solid #3a5ba0; padding:11px 15px; margin:10px 0; font-size:0.88rem; }
+  .vraag-box strong { display:block; font-size:0.7rem; letter-spacing:1.5px; text-transform:uppercase; color:#3a5ba0; margin-bottom:4px; }
+  .antwoord-wrap { margin-top:10px; }
+  .antwoord-label { font-size:0.7rem; letter-spacing:1.5px; text-transform:uppercase; color:#3a5ba0; margin-bottom:5px; display:block; }
+  textarea.antwoord { width:100%; min-height:72px; border:1px solid #c8d4ee; background:#f8faff; padding:8px 10px; font-family:'Source Serif 4',serif; font-size:0.87rem; line-height:1.55; resize:vertical; color:var(--zwart); }
+  textarea.antwoord:focus { outline:none; border-color:#3a5ba0; background:#fff; }
+  .check-row { padding:10px 16px 16px 70px; display:flex; align-items:center; gap:10px; }
+  .btn-check { background:var(--zwart); color:var(--ivoor); border:none; padding:8px 18px; font-family:'Source Serif 4',serif; font-size:0.78rem; letter-spacing:1px; cursor:pointer; text-transform:uppercase; transition:background 0.2s; }
+  .btn-check:hover:not(:disabled) { background:var(--rood); }
+  .btn-check:disabled { opacity:0.5; cursor:not-allowed; }
+  .btn-check.done { background:#3a7a3a; }
+  .status { font-size:0.78rem; color:var(--grijs); font-style:italic; }
+  .status.ok { color:#3a7a3a; font-style:normal; font-weight:600; }
+
+  #done-banner { display:none; background:var(--rood); color:white; padding:28px 32px; text-align:center; margin-top:44px; }
+  #done-banner h2 { font-family:'Playfair Display',serif; font-size:1.6rem; margin-bottom:6px; }
+  #done-banner p { font-size:0.9rem; opacity:0.85; }
+
+  .docent-bar { background:#1a1814; color:var(--ivoor); padding:22px 28px; margin-top:52px; }
+  .docent-bar h3 { font-family:'Playfair Display',serif; color:var(--goud); font-size:1rem; margin-bottom:4px; }
+  .docent-bar p { font-size:0.82rem; color:#777; margin-bottom:12px; }
+  .btn-docent { background:none; border:1px solid var(--goud); color:var(--goud); padding:7px 16px; font-size:0.8rem; cursor:pointer; letter-spacing:1px; transition:all 0.2s; }
+  .btn-docent:hover { background:var(--goud); color:var(--zwart); }
+  #docent-info { display:none; margin-top:18px; }
+  #docent-info.vis { display:block; }
+  .docent-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:8px; margin-top:10px; }
+  .docent-item { background:#0e0c0a; border:1px solid #2a2622; padding:9px 13px; font-size:0.8rem; }
+  .docent-item .dn { color:var(--goud); font-weight:700; font-family:'Playfair Display',serif; margin-right:6px; }
+  footer { text-align:center; padding:24px 20px; border-top:1px solid var(--lichtgrijs); font-size:0.75rem; color:var(--grijs); font-style:italic; margin-top:44px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="badge">Fotojacht &middot; Deel 1 van 2</div>
+    <h1>Berliner Dom<br><em>Fotojacht</em></h1>
+    <p class="sub">Nationalisme in Duitsland &mdash; Museumeiland, Berlijn</p>
+    <div class="meta">
+      <div><strong>Locatie:</strong> Berliner Dom, Museumeiland</div>
+      <div><strong>Groepsgrootte:</strong> 3&ndash;4 leerlingen</div>
+      <div><strong>Jouw letters:</strong> HOHENZ (posities 1&ndash;6)</div>
+      <div><strong>Eindwoord:</strong> samen met de Lustgarten-groep</div>
+    </div>
+  </div>
+</header>
+<main>
+  <div class="intro">
+    <h2>Hoe werkt dit?</h2>
+    <p>Jullie groep maakt 6 fotoopdrachten bij de Berliner Dom. Laat elke foto goedkeuren door de docent &mdash; dan verschijnt de bijbehorende letter automatisch op de juiste plek in het woordraster. Aan het einde zoeken jullie de Lustgarten-groep op om het eindwoord te ontdekken.</p>
+  </div>
+
+  <div class="puzzle-section">
+    <div class="puzzle-label">Jouw 6 letters &mdash; Berliner Dom</div>
+    <div class="puzzle-title">Letters verschijnen automatisch na goedkeuring</div>
+    <div class="slots-row" id="slots"></div>
+    <div class="puzzle-feedback" id="pfeedback">Verdien letters door opdrachten te voltooien.</div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressbar"></div></div>
+  </div>
+
+  <div class="section-head">Opdrachten &mdash; Berliner Dom</div>
+  <p class="section-sub">Gebouwd 1894&ndash;1905 onder Wilhelm II als nationaal symbool van Pruisische macht.</p>
+  <div class="cards">
+
+    <!-- OPDRACHT 1 — levert letter H op positie 3 -->
+    <div class="card" id="card-1">
+      <div class="card-header">
+        <div class="card-num"><span class="n">1</span><span class="l">Dom</span></div>
+        <div class="card-title-area"><h3>De machtige koepel</h3><span class="tag tag-dom">Exterieur</span></div>
+      </div>
+      <div class="card-body">
+        <p>De koepel van de Berliner Dom is het meest herkenbare element van het gebouw. Wilhelm II liet de Dom bewust groter en imposanter maken dan de vroegere kerk &mdash; een statement van nationale trots en macht.</p>
+        <div class="foto-box"><strong>&#128248; Fotoopdracht</strong>Maak een foto van de volledige koepel van de Dom, inclusief het gouden kruis bovenop. Jullie groep staat allemaal in beeld, zo klein mogelijk ten opzichte van de koepel.</div>
+        <div class="vraag-box"><strong>&#128172; Denkvraag</strong>Waarom liet Wilhelm II de Dom groter bouwen dan strikt noodzakelijk voor religi&euml;uze doeleinden? Wat wilde hij ermee uitstralen naar het buitenland en naar zijn eigen bevolking?
+          <div class="antwoord-wrap"><span class="antwoord-label">Jouw antwoord</span><textarea class="antwoord" placeholder="Schrijf hier jullie antwoord..."></textarea></div>
+        </div>
+      </div>
+      <div class="check-row"><button class="btn-check" onclick="approve(1)">&#10003; Goedgekeurd door docent</button><span class="status" id="st-1">Wacht op goedkeuring</span></div>
+    </div>
+
+    <!-- OPDRACHT 2 — levert letter Z op positie 6 -->
+    <div class="card" id="card-2">
+      <div class="card-header">
+        <div class="card-num"><span class="n">2</span><span class="l">Dom</span></div>
+        <div class="card-title-area"><h3>Religeus Relief</h3><span class="tag tag-dom">Exterieur</span></div>
+      </div>
+      <div class="card-body">
+        <p>De Dom wordt omringd met allerlij versieringen en beelden, zo ook 2 reliefs aan de voorkant van de Dom. Op deze reliefs word een van de belangrijkste gebeurtenissen in de protestanse geschiedenis afgebeeld, de Rijksdag van Worms. Waar Luther zich moest verdedigen tegenover Karel V.</p>
+        <div class="foto-box"><strong>&#128248; Fotoopdracht</strong>Maak van een van de 2 reliefs een duidelijke foto waarbij een persoon onder het relief staat.</div>
+        <div class="vraag-box"><strong>&#128172; Denkvraag</strong>Waarom is juist de scène van de Rijksdag van Worms met Martin Luther gekozen voor de façade van de Berliner Dom, en wat zegt deze keuze over de relatie tussen protestantisme en Duitse nationale identiteit?
+          <div class="antwoord-wrap"><span class="antwoord-label">Jouw antwoord</span><textarea class="antwoord" placeholder="Schrijf hier jullie antwoord..."></textarea></div>
+        </div>
+      </div>
+      <div class="check-row"><button class="btn-check" onclick="approve(2)">&#10003; Goedgekeurd door docent</button><span class="status" id="st-2">Wacht op goedkeuring</span></div>
+    </div>
+
+    <!-- OPDRACHT 3 — levert letter O op positie 2 -->
+    <div class="card" id="card-3">
+      <div class="card-header">
+        <div class="card-num"><span class="n">3</span><span class="l">Dom</span></div>
+        <div class="card-title-area"><h3>De hoofdingang</h3><span class="tag tag-dom">Exterieur</span></div>
+      </div>
+      <div class="card-body">
+        <p>De indrukwekkende hoofdingang is ontworpen in Italiaanse Hoogrenaissance-stijl. Door bewust Italiaanse architectuur te kopi&euml;ren, plaatste Duitsland zichzelf als opvolger van grote Europese beschavingen &mdash; een kern van nationalistisch denken.</p>
+        <div class="foto-box"><strong>&#128248; Fotoopdracht</strong>Maak een foto voor de hoofdingang van de Dom. &Eacute;&eacute;n groepslid staat precies in het midden van de deuropening, de rest staat ernaast.</div>
+        <div class="vraag-box"><strong>&#128172; Denkvraag</strong>Nationalisten kijken vaak terug naar vroegere &ldquo;glorietijden&rdquo;. Welke historische grootheid probeerde Duitsland hier te imiteren? Waarom is dat een kenmerk van nationalisme?
+          <div class="antwoord-wrap"><span class="antwoord-label">Jouw antwoord</span><textarea class="antwoord" placeholder="Schrijf hier jullie antwoord..."></textarea></div>
+        </div>
+      </div>
+      <div class="check-row"><button class="btn-check" onclick="approve(3)">&#10003; Goedgekeurd door docent</button><span class="status" id="st-3">Wacht op goedkeuring</span></div>
+    </div>
+
+    <!-- OPDRACHT 4 — levert letter H op positie 1 -->
+    <div class="card" id="card-4">
+      <div class="card-header">
+        <div class="card-num"><span class="n">4</span><span class="l">Dom</span></div>
+        <div class="card-title-area"><h3>Renovatie na oorlogsschade</h3><span class="tag tag-dom">Geschiedenis</span></div>
+      </div>
+      <div class="card-body">
+        <p>In mei 1944 trof een bom de koepel en brak een grote brand uit. Aan het eind van de Tweede Wereldoorlog was 25% van de kerk verwoest. Het nationalisme dat de Dom inspireerde had uiteindelijk geleid tot de verwoesting ervan.</p>
+        <div class="foto-box"><strong>&#128248; Fotoopdracht</strong>In 2008 werd het 12,5 tonnen zware en 15 meter hoge gouden kruis weer bovenop de koepel geplaatst. Maak een foto van dit kruis.</div>
+        <div class="vraag-box"><strong>&#128172; Denkvraag</strong>Het nazisme was een extreme vorm van nationalisme. Hoe kan een ideologie die begon met trots op de eigen natie eindigen met de verwoesting van diezelfde nationale symbolen?
+          <div class="antwoord-wrap"><span class="antwoord-label">Jouw antwoord</span><textarea class="antwoord" placeholder="Schrijf hier jullie antwoord..."></textarea></div>
+        </div>
+      </div>
+      <div class="check-row"><button class="btn-check" onclick="approve(4)">&#10003; Goedgekeurd door docent</button><span class="status" id="st-4">Wacht op goedkeuring</span></div>
+    </div>
+
+    <!-- OPDRACHT 5 — levert letter N op positie 5 -->
+    <div class="card" id="card-5">
+      <div class="card-header">
+        <div class="card-num"><span class="n">5</span><span class="l">Dom</span></div>
+        <div class="card-title-area"><h3>De Hohenzollern-crypte</h3><span class="tag tag-dom">historie</span></div>
+      </div>
+      <div class="card-body">
+        <p>De Dom fungeerde als hofkerk en begraafplaats van de Hohenzollern-dynastie &mdash; de koningsfamilie van Pruisen en later de keizerlijke familie van het verenigde Duitsland. De koppeling van kerk, staat en vorst was typisch voor 19e-eeuws nationalisme.</p>
+        <div class="foto-box"><strong>&#128248; Fotoopdracht</strong>Zoek aan de buitenkant van de Berliner Dom symbolen die wijzen naar de Hohzollern familie en maak hier een foto van.</div>
+        <div class="vraag-box"><strong>&#128172; Denkvraag</strong>Nationalisten verbinden graag godsdienst en natie. Wat &ldquo;wint&rdquo; een leider door zijn land te koppelen aan religie? Werkt dat vandaag de dag ook nog?
+          <div class="antwoord-wrap"><span class="antwoord-label">Jouw antwoord</span><textarea class="antwoord" placeholder="Schrijf hier jullie antwoord..."></textarea></div>
+        </div>
+      </div>
+      <div class="check-row"><button class="btn-check" onclick="approve(5)">&#10003; Goedgekeurd door docent</button><span class="status" id="st-5">Wacht op goedkeuring</span></div>
+    </div>
+
+    <!-- OPDRACHT 6 — levert letter E op positie 4 — zelfde vraag als Lustgarten vraag 6 -->
+    <div class="card" id="card-6">
+      <div class="card-header">
+        <div class="card-num"><span class="n">6</span><span class="l">Dom</span></div>
+        <div class="card-title-area"><h3>Jullie eigen blik</h3><span class="tag tag-dom">Creatief</span></div>
+      </div>
+      <div class="card-body">
+        <p>De laatste opdracht is aan jullie. Jullie hebben nu beide locaties verkend en geleerd over nationalisme, architectuur en politiek gebruik van publieke ruimte. Nu mogen jullie zelf een foto maken die voor jullie iets zegt over het thema nationalisme.</p>
+        <div class="foto-box"><strong>&#128248; Fotoopdracht</strong>Kies zelf een plek op of nabij het Museumeiland en maak een foto die jullie verbinden met nationalisme. Dit kan symbolisch, letterlijk of juist heel persoonlijk zijn. Jullie moeten hem uitleggen aan de docent.</div>
+        <div class="vraag-box"><strong>&#128172; Denkvraag</strong>In twee zinnen: wat is jullie eigen definitie van nationalisme na deze fotojacht? En: is nationalisme altijd gevaarlijk, of kan het ook positief zijn?
+          <div class="antwoord-wrap"><span class="antwoord-label">Jouw antwoord</span><textarea class="antwoord" placeholder="Schrijf hier jullie antwoord..."></textarea></div>
+        </div>
+      </div>
+      <div class="check-row"><button class="btn-check" onclick="approve(6)">&#10003; Goedgekeurd door docent</button><span class="status" id="st-6">Wacht op goedkeuring</span></div>
+    </div>
+
+  </div>
+
+  <div id="done-banner">
+    <h2>Alle Dom-opdrachten voltooid!</h2>
+    <p>Jullie hebben alle 6 letters verdiend! Zoek nu de Lustgarten-groep op en open samen de <strong>Samenvoeg-app</strong> om het eindwoord te ontdekken.</p>
+  </div>
+
+  <div class="docent-bar">
+    <h3>Voor de docent</h3>
+    <p>Klik om de antwoordenkaart te tonen met letter-vraag koppeling.</p>
+    <button class="btn-docent" onclick="toggleDocent()">&#9660; Toon antwoordenkaart</button>
+    <div id="docent-info">
+      <p style="color:#888;font-size:0.8rem;margin-bottom:10px;">Dom levert <strong style="color:var(--goud)">HOHENZ</strong> (posities 1&ndash;6 van HOHENZOLLERN). Letters zijn willekeurig over de vragen verdeeld.</p>
+      <div class="docent-grid">
+        <div class="docent-item"><span class="dn">Vraag 1</span>Koepel &rarr; letter <strong style="color:var(--goud)">H</strong> (pos 3)</div>
+        <div class="docent-item"><span class="dn">Vraag 2</span>Hoektorens &rarr; letter <strong style="color:var(--goud)">Z</strong> (pos 6)</div>
+        <div class="docent-item"><span class="dn">Vraag 3</span>Ingang &rarr; letter <strong style="color:var(--goud)">O</strong> (pos 2)</div>
+        <div class="docent-item"><span class="dn">Vraag 4</span>Oorlogsschade &rarr; letter <strong style="color:var(--goud)">H</strong> (pos 1)</div>
+        <div class="docent-item"><span class="dn">Vraag 5</span>Crypte &rarr; letter <strong style="color:var(--goud)">N</strong> (pos 5)</div>
+        <div class="docent-item"><span class="dn">Vraag 6</span>Eigen blik &rarr; letter <strong style="color:var(--goud)">E</strong> (pos 4)</div>
+      </div>
+    </div>
+  </div>
+</main>
+<footer>Fotojacht Berlijn &middot; Deel 1: Berliner Dom &middot; Thema: Nationalisme in Duitsland</footer>
+<script>
+// HOHENZOLLERN — Dom gets H,O,H,E,N,Z (positions 1-6, 0-indexed: 0-5)
+// Assigned per question (willekeurig, not in order):
+// Q1->H(pos3, idx2), Q2->Z(pos6, idx5), Q3->O(pos2, idx1), Q4->H(pos1, idx0), Q5->N(pos5, idx4), Q6->E(pos4, idx3)
+const WORD = 'HOHENZ'; // first 6 letters of HOHENZOLLERN
+const ASSIGN = [
+  { q:1, letter:'H', slotIdx:2 },  // pos 3
+  { q:2, letter:'Z', slotIdx:5 },  // pos 6
+  { q:3, letter:'O', slotIdx:1 },  // pos 2
+  { q:4, letter:'H', slotIdx:0 },  // pos 1
+  { q:5, letter:'N', slotIdx:4 },  // pos 5
+  { q:6, letter:'E', slotIdx:3 },  // pos 4
+];
+
+let approved = {};
+
+function buildSlots() {
+  const row = document.getElementById('slots');
+  row.innerHTML = '';
+  for (let i = 0; i < 6; i++) {
+    const el = document.createElement('div');
+    el.className = 'slot'; el.id = 'slot-'+i;
+    const num = document.createElement('span'); num.className = 'slot-num'; num.textContent = 'pos '+(i+1);
+    el.appendChild(num);
+    row.appendChild(el);
+  }
+}
+
+function approve(q) {
+  if (approved[q]) return;
+  approved[q] = true;
+  const btn = document.querySelector('#card-'+q+' .btn-check');
+  const st = document.getElementById('st-'+q);
+  btn.classList.add('done'); btn.disabled = true;
+  const a = ASSIGN.find(x => x.q === q);
+  btn.textContent = 'Letter ' + a.letter + ' verdiend!';
+  st.textContent = 'Letter ' + a.letter + ' staat nu op positie ' + (a.slotIdx+1);
+  st.className = 'status ok';
+
+  // Fill slot
+  const slot = document.getElementById('slot-'+a.slotIdx);
+  slot.innerHTML = '<span class="slot-letter">'+a.letter+'</span><span class="slot-num">pos '+(a.slotIdx+1)+'</span>';
+  slot.classList.add('filled','pop');
+
+  updateProgress();
+}
+
+function updateProgress() {
+  const count = Object.keys(approved).length;
+  document.getElementById('progressbar').style.width = (count/6*100)+'%';
+  const fb = document.getElementById('pfeedback');
+  if (count === 6) {
+    fb.textContent = '&#10003; Alle 6 letters verdiend! Zoek nu de Lustgarten-groep op.';
+    fb.className = 'puzzle-feedback win';
+    document.getElementById('done-banner').style.display = 'block';
+    document.getElementById('done-banner').scrollIntoView({ behavior:'smooth' });
+  } else {
+    fb.textContent = count+' van 6 letters verdiend.';
+    fb.className = 'puzzle-feedback';
+  }
+}
+
+function toggleDocent() {
+  const el = document.getElementById('docent-info'); const btn = document.querySelector('.btn-docent');
+  el.classList.toggle('vis');
+  btn.textContent = el.classList.contains('vis') ? '&#9650; Verberg' : '&#9660; Toon antwoordenkaart';
+}
+
+buildSlots();
+</script>
+</body>
+</html>
